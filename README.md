@@ -69,7 +69,7 @@ INSERT INTO salaries VALUES
 
 
 
-## 📌 SQL Queries
+### 📌 SQL Queries
 
 ### 1️⃣ Find Employees Earning More Than the Company’s Average Salary
 ```sql
