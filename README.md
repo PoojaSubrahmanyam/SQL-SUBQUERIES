@@ -1,7 +1,5 @@
 # 🚀 SQL Subqueries Project
 
-# SQL Employee Database Project
-
 ## 📌 Project Overview
 This project consists of various SQL queries designed to analyze employee data within a company's database. The queries showcase the use of **subqueries, joins, aggregate functions, and filtering techniques** to retrieve meaningful insights.
 
