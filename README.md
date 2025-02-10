@@ -1,181 +1,156 @@
 # 🚀 SQL Subqueries Project
 
-## 📌 Introduction
-This repository contains SQL subqueries demonstrating different query techniques such as single-row subqueries, multi-row subqueries, correlated subqueries, and nested subqueries. These queries help in retrieving complex datasets efficiently.
+# SQL Employee Database Project
 
-## 📊 Dataset
-The queries in this project use a sample dataset with the following tables:
+## 📌 Project Overview
+This project consists of various SQL queries designed to analyze employee data within a company's database. The queries showcase the use of **subqueries, joins, aggregate functions, and filtering techniques** to retrieve meaningful insights.
 
-### 🏢 Employees Table
+## ⚡ Key Features
+- Advanced **subqueries** for complex data retrieval.
+- Use of **JOINS** to fetch related data from multiple tables.
+- **Aggregation functions** like `AVG()`, `MAX()`, and `MIN()`.
+- Efficient **filtering techniques** using `WHERE`, `HAVING`, and `NOT IN`.
+- **Sorting and Limiting Results** for better data representation.
+
+## 📂 Database Schema & Sample Data
+The project assumes the existence of four key tables with sample data:
+
 ```sql
+-- Employees Table
 CREATE TABLE employees (
-    employee_id INT PRIMARY KEY,
-    name VARCHAR(100),
-    salary DECIMAL(10,2),
+    emp_id INT PRIMARY KEY,
+    emp_name VARCHAR(100),
     department_id INT,
-    hire_date DATE,
-    manager_id INT
+    salary DECIMAL(10,2),
+    hire_date DATE
 );
 
-INSERT INTO employees VALUES
-(1, 'Alice', 70000, 1, '2020-06-15', 101),
-(2, 'Bob', 80000, 2, '2019-08-22', 102),
-(3, 'Charlie', 90000, 1, '2018-03-12', 101),
-(4, 'David', 75000, 3, '2021-01-10', 103);
-```
+INSERT INTO employees VALUES 
+(1, 'Alice', 101, 70000, '2015-06-20'),
+(2, 'Bob', 102, 85000, '2018-09-15'),
+(3, 'Charlie', 101, 62000, '2016-02-10'),
+(4, 'Hank', 103, 95000, '2014-11-25');
 
-### 🏢 Departments Table
-```sql
+-- Departments Table
 CREATE TABLE departments (
     department_id INT PRIMARY KEY,
-    name VARCHAR(100),
-    location VARCHAR(100),
+    department_name VARCHAR(100),
     manager_id INT
 );
 
-INSERT INTO departments VALUES
-(1, 'HR', 'Hyderabad', 101),
-(2, 'Finance', 'Bangalore', 102),
-(3, 'IT', 'Chennai', 103);
-```
+INSERT INTO departments VALUES 
+(101, 'IT', 1),
+(102, 'HR', 2),
+(103, 'Finance', 4);
 
-### 👨‍💼 Managers Table
-```sql
-CREATE TABLE managers (
-    manager_id INT PRIMARY KEY,
-    name VARCHAR(100)
+-- Projects Table
+CREATE TABLE projects (
+    emp_id INT,
+    project_id INT,
+    project_name VARCHAR(100),
+    PRIMARY KEY (emp_id, project_id)
 );
 
-INSERT INTO managers VALUES
-(101, 'Pooja'),
-(102, 'John Doe'),
-(103, 'Michael');
-```
+INSERT INTO projects VALUES 
+(1, 201, 'Cloud Migration'),
+(2, 202, 'Recruitment Strategy'),
+(3, 203, 'Cybersecurity Policy');
 
-### 📦 Products Table
-```sql
-CREATE TABLE products (
-    product_id INT PRIMARY KEY,
-    product_name VARCHAR(100),
-    category_id INT,
-    price DECIMAL(10,2)
+-- Salaries Table
+CREATE TABLE salaries (
+    emp_id INT PRIMARY KEY,
+    salary DECIMAL(10,2),
+    bonus DECIMAL(10,2)
 );
 
-INSERT INTO products VALUES
-(1, 'Laptop', 1, 50000),
-(2, 'Mobile', 1, 20000),
-(3, 'Tablet', 1, 30000);
-```
+INSERT INTO salaries VALUES 
+(1, 70000, 5000),
+(2, 85000, 6000),
+(3, 62000, 4000),
+(4, 95000, 7000);
 
-### 🎯 Categories Table
-```sql
-CREATE TABLE categories (
-    category_id INT PRIMARY KEY,
-    category_name VARCHAR(100)
-);
 
-INSERT INTO categories VALUES
-(1, 'Electronics');
-```
-
-### 🧑‍🤝‍🧑 Customers Table
-```sql
-CREATE TABLE customers (
-    customer_id INT PRIMARY KEY,
-    customer_name VARCHAR(100)
-);
-
-INSERT INTO customers VALUES
-(1, 'Rahul'),
-(2, 'Sita'),
-(3, 'Amit');
-```
-
-### 🛒 Orders Table
-```sql
-CREATE TABLE orders (
-    order_id INT PRIMARY KEY,
-    customer_id INT,
-    order_date DATE
-);
-
-INSERT INTO orders VALUES
-(1, 1, '2024-01-15'),
-(2, 2, '2024-01-20'),
-(3, 3, '2024-02-01');
-```
 
 ## 📌 SQL Queries
 
-### 1️⃣ Find Employee with Highest Salary
+### 1️⃣ Find Employees Earning More Than the Company’s Average Salary
 ```sql
-SELECT name, salary  
-FROM employees  
-WHERE salary = (SELECT MAX(salary) FROM employees);
+SELECT * 
+FROM employees e 
+WHERE salary > (SELECT AVG(e2.salary) FROM employees e2);
 ```
 
-### 2️⃣ Find Employees in Hyderabad-Based Departments
+### 2️⃣ List Employees Working in the Same Department as 'Alice'
 ```sql
-SELECT name  
-FROM employees  
-WHERE department_id IN (SELECT department_id FROM departments WHERE location = 'Hyderabad');  
+SELECT *
+FROM employees e
+WHERE e.department_id = (SELECT department_id FROM employees WHERE emp_name = 'Alice');  
 ```
 
-### 3️⃣ Find Employees Earning Above Their Department's Average Salary
+### 3️⃣ Find the Highest Salary in Each Department
 ```sql
-SELECT name, salary  
-FROM employees e1  
-WHERE salary > (SELECT AVG(salary) FROM employees e2 WHERE e1.department_id = e2.department_id);  
+SELECT e1.department_id, e1.salary
+FROM employees e1
+WHERE e1.salary = (SELECT MAX(e2.salary)
+                   FROM employees e2
+                   WHERE e1.department_id = e2.department_id); 
 ```
 
-### 4️⃣ Find Employees Working Under a Specific Manager
+### 4️⃣Retrieve Employees Hired Before the Oldest IT Department Employee
 ```sql
-SELECT name  
-FROM employees  
-WHERE department_id = (SELECT department_id FROM departments WHERE manager_id = (SELECT manager_id FROM managers WHERE name = 'Pooja'));
+SELECT e1.hire_date, e1.department_id, e1.emp_name
+FROM employees e1
+WHERE e1.hire_date < (SELECT MIN(e.hire_date)
+                       FROM employees e
+                       WHERE e.department_id = (SELECT department_id 
+                                                FROM departments 
+                                                WHERE department_name = 'IT'));
 ```
 
-### 5️⃣ Find Employees with Salaries Higher than Their Department's Average
+### 5️⃣ Find the Department Name of 'Hank'
 ```sql
-SELECT name, salary  
-FROM employees  
-WHERE salary > (SELECT AVG(salary) FROM employees WHERE department_id = employees.department_id);
+SELECT e.emp_name, d.department_name
+FROM employees e
+JOIN departments d ON e.department_id = d.department_id
+WHERE e.emp_name = 'Hank';
 ```
 
-### 6️⃣ Get Departments with More Than 5 Employees
+### 6️⃣ List Projects Handled by Employees Earning More Than $80,000
 ```sql
-SELECT department_id  
-FROM employees  
-GROUP BY department_id  
-HAVING COUNT(*) > 5;
+SELECT p.emp_id, p.project_id, p.project_name, s.salary
+FROM projects p
+JOIN salaries s ON p.emp_id = s.emp_id
+WHERE s.salary > 80000;
 ```
 
-### 7️⃣ Find Employees Working Under a Specific Manager
+### 7️⃣ Get Employees Who Have No Assigned Projects
 ```sql
-SELECT name  
-FROM employees  
-WHERE manager_id = (SELECT manager_id FROM managers WHERE name = 'John Doe');
+SELECT e.emp_id, e.emp_name
+FROM employees e
+LEFT JOIN projects p ON e.emp_id = p.emp_id
+WHERE p.emp_id IS NULL;
 ```
 
-### 8️⃣ List Employees Who Joined After the Average Joining Date
+### 8️⃣Find the Employee with the Lowest Salary
 ```sql
-SELECT name, hire_date  
-FROM employees  
-WHERE hire_date > (SELECT AVG(hire_date) FROM employees);
+SELECT e.emp_id, e.emp_name, e.salary
+FROM employees e
+ORDER BY e.salary ASC
+LIMIT 1;
 ```
 
-### 9️⃣ Fetch Products Priced Higher Than the Category's Average Price
+### 9️⃣ Find Employees Whose Bonus is Greater Than the Company Average
 ```sql
-SELECT product_name, price  
-FROM products  
-WHERE price > (SELECT AVG(price) FROM products WHERE category_id = products.category_id);
+SELECT s.emp_id, s.bonus
+FROM salaries s
+WHERE s.bonus > (SELECT AVG(s1.bonus) FROM salaries s1);
 ```
 
-### 🔟 Find Customers Who Placed Orders in the Last 30 Days
+### 🔟 Retrieve Names of Managers Managing at Least One Department
 ```sql
-SELECT customer_name  
-FROM customers  
-WHERE customer_id IN (SELECT customer_id FROM orders WHERE order_date >= CURDATE() - INTERVAL 30 DAY);
+SELECT d.manager_id, d.department_name, e.emp_name
+FROM departments d
+LEFT JOIN employees e ON e.emp_id = d.manager_id;
 ```
 
 ## 🚀 How to Use
